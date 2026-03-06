@@ -1,0 +1,54 @@
+stages:
+  Etape1:
+    cmd: python src/data/1-train_test_split.py
+    deps:
+    - data/raw_data/raw.csv
+    - src/data/1-train_test_split.py
+    outs:
+      - data/processed_data/X_train.csv
+      - data/processed_data/X_test.csv
+      - data/processed_data/y_train.csv
+      - data/processed_data/y_test.csv
+
+  Etape2:
+    cmd: python src/data/2-normalisation.py
+    deps:
+      - src/data/2-normalisation.py
+      - data/processed_data/X_train.csv
+      - data/processed_data/X_test.csv
+    outs:
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/X_test_scaled.csv
+
+  Etape3:
+    cmd: python src/models/3-gridsearch.py
+    deps:
+      - src/models/3-gridsearch.py
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/y_train.csv
+    outs:
+      - models/best_params.pkl
+
+
+  Etape4:
+    cmd: python src/models/4-entrainement.py
+    deps:
+      - src/models/4-entrainement.py
+      - data/processed_data/X_train_scaled.csv
+      - data/processed_data/y_train.csv
+      - models/best_params.pkl
+    outs:
+      - models/model_optimal.pkl
+
+
+  Etape5:
+    cmd: python src/models/5-evaluation.py
+    deps:
+      - src/models/5-evaluation.py
+      - models/model_optimal.pkl
+      - data/processed_data/X_test_scaled.csv
+      - data/processed_data/y_test.csv
+    outs:
+      - data/predictions.csv
+    metrics:
+      - metrics/scores.json
